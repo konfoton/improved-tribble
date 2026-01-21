@@ -1,0 +1,3 @@
+/Users/konradburdach/projekt_grafika_finall/build/CMakeFiles/GrafikaKomputerowa.dir
+/Users/konradburdach/projekt_grafika_finall/build/CMakeFiles/edit_cache.dir
+/Users/konradburdach/projekt_grafika_finall/build/CMakeFiles/rebuild_cache.dir
