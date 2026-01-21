@@ -120,13 +120,13 @@ void main()
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(-FragPos);
 
-    // Kolor flagi - gorna/dolna polowa
+    // Kolor flagi - gorna/dolna polowa (polska flaga: bialy u gory, czerwony na dole)
     vec3 baseColor;
     if(useFlagColors) {
-        if(TexCoord.y < 0.5) {
-            baseColor = flagColor1; // Gorna polowa
+        if(TexCoord.y > 0.5) {
+            baseColor = flagColor1; // Gorna polowa (bialy)
         } else {
-            baseColor = flagColor2; // Dolna polowa
+            baseColor = flagColor2; // Dolna polowa (czerwony)
         }
     } else {
         baseColor = objectColor;

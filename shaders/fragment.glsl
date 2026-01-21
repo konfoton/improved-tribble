@@ -64,6 +64,12 @@ uniform vec3 objectColor;
 uniform bool useTexture;
 uniform sampler2D textureDiffuse;
 
+// Szachownica dla podlogi
+uniform bool useCheckerboard;
+uniform float checkerScale;
+uniform vec3 checkerColor1;
+uniform vec3 checkerColor2;
+
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     vec3 lightDir = normalize(light.position - fragPos);
@@ -133,7 +139,15 @@ void main()
     vec3 viewDir = normalize(-FragPos); // W ukladzie kamery, kamera jest w (0,0,0)
 
     vec3 baseColor;
-    if(useTexture) {
+    if(useCheckerboard) {
+        // Wzor szachownicy na podstawie wspolrzednych UV
+        float u = TexCoord.x * checkerScale;
+        float v = TexCoord.y * checkerScale;
+        int checkX = int(floor(u));
+        int checkY = int(floor(v));
+        bool isEven = ((checkX + checkY) % 2) == 0;
+        baseColor = isEven ? checkerColor1 : checkerColor2;
+    } else if(useTexture) {
         baseColor = texture(textureDiffuse, TexCoord).rgb;
     } else {
         baseColor = objectColor;

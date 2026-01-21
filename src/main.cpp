@@ -372,11 +372,11 @@ Mesh createPlane(float size) {
 
     float halfSize = size / 2.0f;
     float vertices[] = {
-        // Pozycja              Normalna          UV
+        // Pozycja              Normalna          UV (0-1)
         -halfSize, 0.0f, -halfSize,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-         halfSize, 0.0f, -halfSize,  0.0f, 1.0f, 0.0f,  size, 0.0f,
-         halfSize, 0.0f,  halfSize,  0.0f, 1.0f, 0.0f,  size, size,
-        -halfSize, 0.0f,  halfSize,  0.0f, 1.0f, 0.0f,  0.0f, size,
+         halfSize, 0.0f, -halfSize,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+         halfSize, 0.0f,  halfSize,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+        -halfSize, 0.0f,  halfSize,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
     };
 
     unsigned int indices[] = {
@@ -493,28 +493,34 @@ Mesh createBezierPatch() {
     Mesh mesh;
 
     // 16 punktow kontrolnych dla platu bikubicznego Beziera (flaga)
-    // Flaga jest przymocowana z lewej strony (u=0)
+    // Flaga jest pionowa, przymocowana przy maszcie (x=0)
+    // u - kierunek poziomy (od masztu w prawo)
+    // v - kierunek pionowy (od dolu do gory)
+    float flagWidth = 1.5f;
+    float flagHeight = 1.0f;
+    float flagBottom = 2.3f;  // Wysokosc dolnej krawedzi flagi
+
     std::vector<float> controlPoints = {
-        // Wiersz 0 (u=0 - przymocowana krawedz)
-        0.0f, 2.0f, 0.0f,
-        0.0f, 2.0f, 0.5f,
-        0.0f, 2.0f, 1.0f,
-        0.0f, 2.0f, 1.5f,
+        // Wiersz 0 (u=0 - przy maszcie)
+        0.0f, flagBottom + 0.0f * flagHeight / 3.0f, 0.0f,
+        0.0f, flagBottom + 1.0f * flagHeight / 3.0f, 0.0f,
+        0.0f, flagBottom + 2.0f * flagHeight / 3.0f, 0.0f,
+        0.0f, flagBottom + 3.0f * flagHeight / 3.0f, 0.0f,
         // Wiersz 1
-        0.5f, 2.0f, 0.0f,
-        0.5f, 2.0f, 0.5f,
-        0.5f, 2.0f, 1.0f,
-        0.5f, 2.0f, 1.5f,
+        flagWidth / 3.0f, flagBottom + 0.0f * flagHeight / 3.0f, 0.0f,
+        flagWidth / 3.0f, flagBottom + 1.0f * flagHeight / 3.0f, 0.0f,
+        flagWidth / 3.0f, flagBottom + 2.0f * flagHeight / 3.0f, 0.0f,
+        flagWidth / 3.0f, flagBottom + 3.0f * flagHeight / 3.0f, 0.0f,
         // Wiersz 2
-        1.0f, 2.0f, 0.0f,
-        1.0f, 2.0f, 0.5f,
-        1.0f, 2.0f, 1.0f,
-        1.0f, 2.0f, 1.5f,
+        2.0f * flagWidth / 3.0f, flagBottom + 0.0f * flagHeight / 3.0f, 0.0f,
+        2.0f * flagWidth / 3.0f, flagBottom + 1.0f * flagHeight / 3.0f, 0.0f,
+        2.0f * flagWidth / 3.0f, flagBottom + 2.0f * flagHeight / 3.0f, 0.0f,
+        2.0f * flagWidth / 3.0f, flagBottom + 3.0f * flagHeight / 3.0f, 0.0f,
         // Wiersz 3 (u=1 - swobodna krawedz)
-        1.5f, 2.0f, 0.0f,
-        1.5f, 2.0f, 0.5f,
-        1.5f, 2.0f, 1.0f,
-        1.5f, 2.0f, 1.5f,
+        flagWidth, flagBottom + 0.0f * flagHeight / 3.0f, 0.0f,
+        flagWidth, flagBottom + 1.0f * flagHeight / 3.0f, 0.0f,
+        flagWidth, flagBottom + 2.0f * flagHeight / 3.0f, 0.0f,
+        flagWidth, flagBottom + 3.0f * flagHeight / 3.0f, 0.0f,
     };
 
     glGenVertexArrays(1, &mesh.VAO);
@@ -610,11 +616,11 @@ void setLightUniforms(Shader& shader, const glm::mat4& view) {
     shader.setInt("numPointLights", 2);
     shader.setInt("numSpotLights", 2);
 
-    // Material
-    shader.setVec3("material.ambient", glm::vec3(0.2f));
-    shader.setVec3("material.diffuse", glm::vec3(0.8f));
-    shader.setVec3("material.specular", glm::vec3(1.0f));
-    shader.setFloat("material.shininess", 32.0f);
+    // Material - nizszy shininess = wiekszy, bardziej rozproszony highlight
+    shader.setVec3("material.ambient", glm::vec3(0.25f));
+    shader.setVec3("material.diffuse", glm::vec3(0.9f));
+    shader.setVec3("material.specular", glm::vec3(0.6f));  // Mniej intensywny specular
+    shader.setFloat("material.shininess", 12.0f);          // Wiekszy highlight (bylo 32)
 
     // Swiatlo punktowe 1 - stale (lampa uliczna)
     glm::vec3 pointLight1Pos(3.0f, 4.0f, 3.0f);
@@ -624,8 +630,8 @@ void setLightUniforms(Shader& shader, const glm::mat4& view) {
     shader.setVec3("pointLights[0].diffuse", glm::vec3(1.0f, 0.9f, 0.7f) * dayNightFactor);
     shader.setVec3("pointLights[0].specular", glm::vec3(1.0f) * dayNightFactor);
     shader.setFloat("pointLights[0].constant", 1.0f);
-    shader.setFloat("pointLights[0].linear", 0.09f);
-    shader.setFloat("pointLights[0].quadratic", 0.032f);
+    shader.setFloat("pointLights[0].linear", 0.22f);      // Szybsze zanikanie
+    shader.setFloat("pointLights[0].quadratic", 0.20f);   // Szybsze zanikanie
 
     // Swiatlo punktowe 2 - stale (druga lampa)
     glm::vec3 pointLight2Pos(-4.0f, 3.0f, -2.0f);
@@ -635,8 +641,8 @@ void setLightUniforms(Shader& shader, const glm::mat4& view) {
     shader.setVec3("pointLights[1].diffuse", glm::vec3(0.5f, 0.5f, 1.0f));
     shader.setVec3("pointLights[1].specular", glm::vec3(0.5f));
     shader.setFloat("pointLights[1].constant", 1.0f);
-    shader.setFloat("pointLights[1].linear", 0.14f);
-    shader.setFloat("pointLights[1].quadratic", 0.07f);
+    shader.setFloat("pointLights[1].linear", 0.35f);      // Szybsze zanikanie
+    shader.setFloat("pointLights[1].quadratic", 0.44f);   // Szybsze zanikanie
 
     // Reflektor 1 - na ruchomym obiekcie (reflektor samochodu)
     glm::vec3 spotLightPos = movingObjectPos + glm::vec3(0.0f, 0.3f, 0.0f);
@@ -654,14 +660,14 @@ void setLightUniforms(Shader& shader, const glm::mat4& view) {
 
     shader.setVec3("spotLights[0].position", spotLightPosView);
     shader.setVec3("spotLights[0].direction", spotLightDirView);
-    shader.setVec3("spotLights[0].ambient", glm::vec3(0.0f));
-    shader.setVec3("spotLights[0].diffuse", glm::vec3(1.0f, 1.0f, 0.8f));
-    shader.setVec3("spotLights[0].specular", glm::vec3(1.0f));
+    shader.setVec3("spotLights[0].ambient", glm::vec3(0.05f));
+    shader.setVec3("spotLights[0].diffuse", glm::vec3(2.5f, 2.5f, 2.0f));  // Mocniejszy reflektor
+    shader.setVec3("spotLights[0].specular", glm::vec3(2.0f));              // Mocniejszy blask
     shader.setFloat("spotLights[0].constant", 1.0f);
-    shader.setFloat("spotLights[0].linear", 0.09f);
-    shader.setFloat("spotLights[0].quadratic", 0.032f);
-    shader.setFloat("spotLights[0].cutOff", glm::cos(glm::radians(12.5f)));
-    shader.setFloat("spotLights[0].outerCutOff", glm::cos(glm::radians(17.5f)));
+    shader.setFloat("spotLights[0].linear", 0.14f);       // Umiarkowane zanikanie
+    shader.setFloat("spotLights[0].quadratic", 0.07f);    // Umiarkowane zanikanie
+    shader.setFloat("spotLights[0].cutOff", glm::cos(glm::radians(15.0f)));    // Szerszy stożek
+    shader.setFloat("spotLights[0].outerCutOff", glm::cos(glm::radians(25.0f))); // Szerszy stożek
 
     // Reflektor 2 - staly (reflektor sceny)
     glm::vec3 spotLight2Pos(0.0f, 6.0f, 0.0f);
@@ -832,6 +838,15 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+    // Utworz domyslna biala teksture 1x1 (zapobiega bledowi samplera)
+    unsigned int defaultTexture;
+    glGenTextures(1, &defaultTexture);
+    glBindTexture(GL_TEXTURE_2D, defaultTexture);
+    unsigned char whitePixel[] = {255, 255, 255, 255};
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     // Wczytaj shadery
     Shader mainShader;
     if (!mainShader.loadFromFiles("shaders/vertex.glsl", "shaders/fragment.glsl")) {
@@ -927,15 +942,27 @@ int main() {
         mainShader.setMat4("view", view);
         setLightUniforms(mainShader, view);
 
-        // Podloga
+        // Aktywuj domyslna teksture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, defaultTexture);
+        mainShader.setInt("textureDiffuse", 0);
+        mainShader.setBool("useTexture", false);
+
+        // Podloga z wzorem szachownicy
         {
             glm::mat4 model = glm::mat4(1.0f);
             glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(view * model)));
             mainShader.setMat4("model", model);
             mainShader.setMat3("normalMatrix", normalMatrix);
-            mainShader.setVec3("objectColor", glm::vec3(0.3f, 0.5f, 0.3f));
+            mainShader.setBool("useCheckerboard", true);
+            mainShader.setFloat("checkerScale", 10.0f); // 10x10 kratek
+            mainShader.setVec3("checkerColor1", glm::vec3(0.5f, 0.5f, 0.5f)); // Szary jasny
+            mainShader.setVec3("checkerColor2", glm::vec3(0.25f, 0.25f, 0.25f)); // Szary ciemny
+            glDisable(GL_CULL_FACE); // Podloga widoczna z obu stron
             glBindVertexArray(plane.VAO);
             glDrawElements(GL_TRIANGLES, plane.indexCount, GL_UNSIGNED_INT, 0);
+            glEnable(GL_CULL_FACE);
+            mainShader.setBool("useCheckerboard", false); // Wylacz dla innych obiektow
         }
 
         // Ruchomy obiekt (samochod/szescian)
@@ -1015,6 +1042,8 @@ int main() {
         }
 
         // ====== RENDEROWANIE FLAGI (BEZIER) ======
+        glDisable(GL_CULL_FACE); // Flaga jest widoczna z obu stron
+
         bezierShader.use();
         bezierShader.setMat4("projection", projection);
         bezierShader.setMat4("view", view);
@@ -1041,6 +1070,8 @@ int main() {
             glPatchParameteri(GL_PATCH_VERTICES, 16);
             glDrawArrays(GL_PATCHES, 0, 16);
         }
+
+        glEnable(GL_CULL_FACE); // Przywroc culling
 
         // Swap buffers
         glfwSwapBuffers(window);

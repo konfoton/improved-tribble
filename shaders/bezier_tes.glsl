@@ -86,22 +86,24 @@ void main()
 
     // Animacja wiatru - sinusoidalna deformacja
     // Im dalej od krawedzi przymocowania (u=0), tym wieksza deformacja
+    // Flaga jest w plaszczynnie XY, wiatr wygina ja w kierunku Z
     float windEffect = u * u * windStrength;
-    float wave1 = sin(time * 2.0 + u * 4.0 + v * 2.0) * windEffect;
-    float wave2 = sin(time * 3.5 + u * 3.0 - v * 1.5) * windEffect * 0.5;
-    float wave3 = sin(time * 1.5 + u * 2.0 + v * 3.0) * windEffect * 0.3;
+    float wave1 = sin(time * 2.5 + u * 5.0 + v * 2.0) * windEffect;
+    float wave2 = sin(time * 4.0 + u * 3.5 - v * 1.5) * windEffect * 0.4;
+    float wave3 = sin(time * 1.8 + u * 2.5 + v * 4.0) * windEffect * 0.25;
 
-    pos.x += (wave1 + wave2) * windDirection.x;
-    pos.z += (wave1 + wave2) * windDirection.y;
-    pos.y += wave3 * 0.5;
+    // Glowna deformacja w kierunku Z (w glab sceny)
+    pos.z += (wave1 + wave2 + wave3) * windDirection.x;
+    // Lekka deformacja w kierunku X (rozciaganie)
+    pos.x += wave2 * 0.1 * windDirection.y;
 
     // Oblicz normalna przez pochodne czesciowe
     vec3 du = evaluateBezierDu(u, v);
     vec3 dv = evaluateBezierDv(u, v);
 
-    // Zmodyfikuj pochodne dla animacji
-    du.x += cos(time * 2.0 + u * 4.0 + v * 2.0) * 4.0 * 2.0 * u * windStrength * windDirection.x;
-    du.z += cos(time * 2.0 + u * 4.0 + v * 2.0) * 4.0 * 2.0 * u * windStrength * windDirection.y;
+    // Zmodyfikuj pochodne dla animacji (dla poprawnych normali)
+    float dWave = cos(time * 2.5 + u * 5.0 + v * 2.0) * 5.0 * 2.0 * u * windStrength * windDirection.x;
+    du.z += dWave;
 
     vec3 normal = normalize(cross(du, dv));
 
