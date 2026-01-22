@@ -252,14 +252,16 @@ Mesh createSphere(int sectors, int stacks) {
 
         for (int j = 0; j < sectors; ++j, ++k1, ++k2) {
             if (i != 0) {
+                // Fixed winding order: CCW when viewed from outside
                 indices.push_back(k1);
-                indices.push_back(k2);
                 indices.push_back(k1 + 1);
+                indices.push_back(k2);
             }
             if (i != (stacks - 1)) {
+                // Fixed winding order: CCW when viewed from outside
                 indices.push_back(k1 + 1);
-                indices.push_back(k2);
                 indices.push_back(k2 + 1);
+                indices.push_back(k2);
             }
         }
     }
@@ -452,13 +454,14 @@ Mesh createTorus(float innerRadius, float outerRadius, int rings, int sides) {
             int a = i * (sides + 1) + j;
             int b = a + sides + 1;
 
+            // Fixed winding order: CCW when viewed from outside
             indices.push_back(a);
-            indices.push_back(b);
             indices.push_back(a + 1);
+            indices.push_back(b);
 
             indices.push_back(a + 1);
-            indices.push_back(b);
             indices.push_back(b + 1);
+            indices.push_back(b);
         }
     }
 
