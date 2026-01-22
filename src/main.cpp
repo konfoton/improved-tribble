@@ -454,7 +454,7 @@ Mesh createTorus(float innerRadius, float outerRadius, int rings, int sides) {
             int a = i * (sides + 1) + j;
             int b = a + sides + 1;
 
-            // Fixed winding order: CCW when viewed from outside
+            // Winding: CCW when viewed from outside (matches outward normals)
             indices.push_back(a);
             indices.push_back(a + 1);
             indices.push_back(b);
